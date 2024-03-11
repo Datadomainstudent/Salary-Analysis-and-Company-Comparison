@@ -1,0 +1,194 @@
+#------------------- BASIC----------------
+# 1. WHAT IS THE AVG SALARY FOR ALL THE JOBS IN THE DATASET?
+select avg(salary) as avg_salary 
+from jobs; 
+
+# 2. WHAT IS THE HIGHEST SALARY IN THE DATASET AND WHICH JOB ROLE DOES IT CORRESPOND TO?
+
+select max(salary) as highest_salary, job_title from jobs
+group by job_title;
+
+# 3. WHAT IS THE AVG SALARY FOR DATA SCIENTIST IN US?
+
+select avg(salary) as Average_Salary 
+from jobs
+where job_title = 'Data Scientist' and company_location = 'US';
+
+
+# 4. WHAT IS THE NUMBER OF JOBS AVAILABLE FOR EACH JOB TITLE?
+
+
+select job_title, count(*) as NO_Jobs
+from jobs
+group by job_title;
+
+# 5. WHAT IS THE TOTAL SALARY PAID FOR ALL DATA ANALYST JOBS IN DE?
+
+select sum(salary) as Total_salary 
+from jobs
+where job_title = 'Data Analyst' and company_location = 'DE';
+
+# 6. WHAT ARE THE TOP 5 HIGHEST PAYING JOB TITLES AND THEIR CORRESPONDING AVERAGE SALARIES?
+
+select job_title, avg(salary) as Avg_salary
+from jobs
+group by job_title
+order by avg_salary
+Desc limit 5;
+
+# 7. WHAT IS THE NUMBER OF JOBS AVAILABLE IN EACH LOCATION?
+
+select company_location, count(job_title) 
+from jobs
+group by company_location;
+
+# 8. what are the top 3 job titles that have the most jobs available in the dataset?
+select job_title, count(job_title) as NO_jobs
+from jobs
+group by job_title
+order by NO_jobs
+desc limit 3;
+
+# 9. WHAT IS THE AVG SALARY FOR DATA ENGINEERS IN BOSTON?
+
+select avg(salary)
+from jobs
+where job_title = 'Data Engineer' and company_location = 'Boston';
+
+# 10. WHAT ARE THE TOP 5 CITIES WITH THE HIGHEST AVG SALARIES?
+
+select company_location, avg(salary) as avg_salary
+from jobs
+group by company_location
+order by avg_salary 
+desc limit 5;
+
+#--------------------------INTERMEDIATE------------------------------
+
+# 11. WHAT IS THE AVG SALARY FOR EACH JOB, AND WHAT IS THE TOTAL NO OF JOBS AVAILABLE FOR EACH JOB TITLE?
+
+select job_title, avg(salary), count(job_title)
+from jobs
+group by job_title;
+
+# 12. WHAT ARE THE TOP 5 JOB TITLES WITH THE HIGHEST TOTAL SALARIES, AND WHAT IS THE TOTAL NO OF JOBS VAOLABLE FOR EACH JOB TITLE;
+
+select job_title, sum(salary) as total_salary, count(job_title)
+from jobs
+group by job_title
+order by total_salary
+desc limit 5;
+
+# 13. WHAT ARE THE TOP 5 LOCATIONS WITH THE HIGHEST SALARY ABD WHAT IS THE TOTAL SALARY NUMBER OF JOBS AVAILABLE FOR EACH LOCATIONS?
+
+select company_location, max(salary) as highest_Salary, count(job_title)
+from jobs
+group by company_location
+order by highest_Salary
+desc limit 5;
+
+# 14. WHAT is the average salary for each job title in each location, and what is the total no of jobs available forneach job title in each location?
+
+select company_location, avg(salary) as avg_salary, count(job_title) as NO_jobs
+from jobs
+group by job_title,company_location;
+
+# 15. WHAT IS THE AVG SALARY FOR EACH JOB TITLE IN EACH LOCATION, AND WHAT IS THE PERCENTAGE OF JOBS FOR EACH TITLE IN EACH LOCATION?
+
+-- Calculate average salary for each job title in each location
+SELECT job_title, employee_residence AS location, AVG(salary_in_usd) AS avg_salary
+FROM jobs
+GROUP BY job_title, employee_residence;
+
+-- Calculate percentage of jobs for each title in each location
+SELECT job_title, employee_residence AS location, COUNT(*) * 100.0 / SUM(COUNT(*)) OVER (PARTITION BY employee_residence) AS job_percentage
+FROM jobs
+GROUP BY job_title, employee_residence;
+
+# 16. what is the top 5 job titles with the highest avg salaries, and what is the total no of jobs available for each job title?
+
+select job_title, avg(salary) as avg_salary, count(job_title)
+from jobs
+group by job_title
+order by avg_salary
+desc limit 5;
+
+# 17. WHAT IS THE AVG SALARY FOR EACH JOB TITLE, AND WHAT IS THE PERCENTAGE OF JOBS FOR EACH JOB TITLE IN THE DATASET?
+
+select job_title, avg(salary) as avg_salary,
+(COUNT(*) * 100.0 / (SELECT COUNT(*) FROM jobs)) as job_percentage
+from jobs
+group by job_title
+
+# 18. WHAT IS THE TOTAL NO OF JOBS AVAILABLE FOR EACH YEAR OF EXPERINCE , AND WAHT IS THE AVG SALARY FOR EACH YEAR OF experince?
+
+select experince_level, avg(salary) as avg_salary, count(experince_level) as NO_jobs
+from jobs
+group by experince_level;
+
+# 19. WHAT ARE THE TOP 5 JOB TITLES WITH THE HIGHEST AVERAGE SALARIES IN EACH LOCATION?
+
+select job_title, company_location, avg(salary) as avg_salary
+from jobs
+group by company_location,job_title
+order by avg_salary
+desc limit 5;
+
+#----------------------------------ADVANCE-----------------------------------------------------
+
+# 20. WHAT ARE THE TOP 5 JOB TITLES WITH THE HIGHEST SALARIES, AND WHAT IS THE NAME OF THE COMPANY?
+
+select job_title, max(salary) as max_salary, company_name
+from jobs
+inner join companies on jobs.id = companies.id
+group by job_title,company_name
+order by max_salary
+desc limit 5;
+
+# 21. WHAT ARE THE ToTAL NO OF JOBS AVAILABLE FOR EACH JOB TITLE, AND WHAT IS THE NAME OF THE COMPANY THAT OFFERS THE HIGHEST SALARY FOR EACH JOB TITLE?
+
+
+SELECT job_title, COUNT(*) AS NO_jobs, company_name
+FROM jobs
+INNER JOIN companies ON jobs.id = companies.id
+WHERE salary = (SELECT MAX(salary) FROM jobs WHERE job_title = jobs.job_title)
+GROUP BY job_title, company_name;
+
+# 22. WHAT ARE THE TOP 5 CITIES WITH THE HIGHEST AVERAGE SALARIES, AND WHAT IS THE NAME OF THE COMPANY THAT OFFERS THE HIGHEST SALARY FOR EACH CITY?
+
+select company_location, avg(salary) as avg_salary, company_name
+from jobs
+inner join companies on jobs.id = companies.id
+group by company_location, company_name
+order by avg_salary
+desc limit 5;
+
+# 23. WHAT IS THE AVG SALARY FOR EACH TITLE IN EACH COMPANY, AND WHAT IS THE RANK OF EACH JOB TITLE WITHIN EACH COMPANY BASED ON THE AVG SALARY?
+
+SELECT job_title,company_name,AVG(salary) AS avg_salary,
+RANK() OVER (PARTITION BY company_name ORDER BY AVG(salary) DESC) AS rank_within_company
+FROM jobs
+INNER JOIN companies ON jobs.id = companies.id
+GROUP BY 
+job_title, company_name;
+
+# 24. WHAT IS THE TOTAL NO OF JOBS AVAILABLE FOR EACH JOB TITLE IN EACH LOCATION, AND WHAT IS THE RANK OF EACH TITLE
+ # IN EACH LOCATION , AND WHAT RANK OF EACH JON TITLE withIN EACH LOCATION BASED ON THE TOTAL NO OF JOBS?
+ 
+SELECT job_title,company_location,COUNT(*) AS total_jobs,
+    RANK() OVER (PARTITION BY company_location ORDER BY COUNT(*) DESC) AS rank_within_location,
+    RANK() OVER (PARTITION BY job_title, company_location ORDER BY COUNT(*) DESC) AS rank_within_title_location
+FROM jobs
+GROUP BY job_title, company_location;
+
+# 25. WHAT IS THE AVG SALARY FOR EACH JOB TITLE IN EACH LOCATION, AND WHAT IS THE NAME OF THE COMPANY THAAT OFFERS THE HIGHEST SALARY FOR EACH JOB TITLE IN EACH LOCATION?
+
+SELECT job_title,company_location,AVG(salary) AS avg_salary,company_name 
+FROM jobs
+INNER JOIN companies ON jobs.company_id = companies.id
+WHERE 
+    (job_title, company_location, salary) IN (
+        SELECT job_title,company_location,MAX(salary)
+        FROM jobs 
+        GROUP BY job_title, company_location)
+GROUP BY job_title, company_location, company_name;
